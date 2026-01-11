@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glad Tiding Plumbing Service - Business Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-btn.active { background: #0ea5e9; color: white; }
+        .modal { display: none; }
+        .modal.show { display: flex; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+        .reminder-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-lg no-print">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white p-2 rounded-full">
+                        <i class="fas fa-wrench text-sky-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold">Glad Tiding Plumbing Service</h1>
+                        <p class="text-sky-200 text-sm">Business Management System</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="checkReminders()" class="relative" title="Reminders">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="reminderBadge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center reminder-pulse">0</span>
+                    </button>
+                    <span class="text-sm hidden md:block" id="currentDate"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow-md sticky top-0 z-40 no-print">
+        <div class="container mx-auto px-4">
+            <div class="flex overflow-x-auto gap-1 py-2">
+                <button class="tab-btn active px-4 py-2 rounded-lg font-medium whitespace-nowrap transition" onclick="showTab('dashboard')">
+                    <i class="fas fa-home mr-1"></i> Dashboard
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('appointments')">
+                    <i class="fas fa-calendar mr-1"></i> Appointments
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('clients')">
+                    <i class="fas fa-users mr-1"></i> Clients
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('quotes')">
+                    <i class="fas fa-file-alt mr-1"></i> Quotes
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('invoices')">
+                    <i class="fas fa-file-invoice mr-1"></i> Invoices
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('finances')">
+                    <i class="fas fa-naira-sign mr-1"></i> Finances
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('sales')">
+                    <i class="fas fa-table mr-1"></i> Sales Sheet
+                </button>
+                <button class="tab-btn px-4 py-2 rounded-lg font-medium whitespace-nowrap transition hover:bg-gray-100" onclick="showTab('team')">
+                    <i class="fas fa-user-hard-hat mr-1"></i> Team
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-6">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100">Total Income</p>
+                            <p class="text-2xl font-bold">₦<span id="totalIncome">0</span></p>
+                        </div>
+                        <i class="fas fa-arrow-up text-3xl opacity-50"></i>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100">Total Expenses</p>
+                            <p class="text-2xl font-bold">₦<span id="totalExpenses">0</span></p>
+                        </div>
+                        <i class="fas fa-arrow-down text-3xl opacity-50"></i>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-sky-500 to-sky-600 text-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sky-100">Net Profit</p>
+                            <p class="text-2xl font-bold">₦<span id="netProfit">0</span></p>
+                        </div>
+                        <i class="fas fa-chart-line text-3xl opacity-50"></i>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100">Today's Appointments</p>
+                            <p class="text-2xl font-bold"><span id="todayAppointments">0</span></p>
+                        </div>
+                        <i class="fas fa-calendar-check text-3xl opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Breakdown -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800"><i class="fas fa-chart-pie mr-2 text-sky-600"></i>Expense Breakdown</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                            <span class="flex items-center"><i class="fas fa-utensils text-orange-500 mr-2"></i> Food/Feeding</span>
+                            <span class="font-bold text-orange-600">₦<span id="expFood">0</span></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <span class="flex items-center"><i class="fas fa-car text-blue-500 mr-2"></i> Transport</span>
+                            <span class="font-bold text-blue-600">₦<span id="expTransport">0</span></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <span class="flex items-center"><i class="fas fa-tools text-green-500 mr-2"></i> Materials</span>
+                            <span class="font-bold text-green-600">₦<span id="expMaterials">0</span></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                            <span class="flex items-center"><i class="fas fa-hand-holding-usd text-purple-500 mr-2"></i> Labour</span>
+                            <span class="font-bold text-purple-600">₦<span id="expLabour">0</span></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span class="flex items-center"><i class="fas fa-ellipsis-h text-gray-500 mr-2"></i> Other</span>
+                            <span class="font-bold text-gray-600">₦<span id="expOther">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Appointments -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800"><i class="fas fa-clock mr-2 text-sky-600"></i>Upcoming Appointments</h3>
+                    <div id="upcomingAppointments" class="space-y-3 max-h-64 overflow-y-auto">
+                        <p class="text-gray-500 text-center py-4">No upcoming appointments</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold mb-4 text-gray-800"><i class="fas fa-bolt mr-2 text-yellow-500"></i>Quick Actions</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button onclick="showTab('appointments'); openAppointmentModal()" class="p-4 bg-sky-50 hover:bg-sky-100 rounded-lg text-center transition">
+                        <i class="fas fa-calendar-plus text-2xl text-sky-600 mb-2"></i>
+                        <p class="text-sm font-medium">New Appointment</p>
+                    </button>
+                    <button onclick="showTab('finances'); document.getElementById('expenseForm').scrollIntoView()" class="p-4 bg-red-50 hover:bg-red-100 rounded-lg text-center transition">
+                        <i class="fas fa-minus-circle text-2xl text-red-600 mb-2"></i>
+                        <p class="text-sm font-medium">Add Expense</p>
+                    </button>
+                    <button onclick="showTab('invoices'); openInvoiceModal()" class="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition">
+                        <i class="fas fa-file-invoice text-2xl text-green-600 mb-2"></i>
+                        <p class="text-sm font-medium">New Invoice</p>
+                    </button>
+                    <button onclick="showTab('quotes'); openQuoteModal()" class="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition">
+                        <i class="fas fa-file-alt text-2xl text-purple-600 mb-2"></i>
+                        <p class="text-sm font-medium">New Quote</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Tab -->
+        <div id="appointments" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-calendar-alt mr-2 text-sky-600"></i>Appointments</h2>
+                    <button onclick="openAppointmentModal()" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition">
+                        <i class="fas fa-plus mr-2"></i>New Appointment
+                    </button>
+                </div>
+                
+                <!-- Calendar View -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="calendarMonth" class="text-lg font-bold"></h3>
+                        <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                        <div class="font-bold text-gray-600 text-sm">Sun</div>
+                        <div class="font-bold text-gray-600 text-sm">Mon</div>
+                        <div class="font-bold text-gray-600 text-sm">Tue</div>
+                        <div class="font-bold text-gray-600 text-sm">Wed</div>
+                        <div class="font-bold text-gray-600 text-sm">Thu</div>
+                        <div class="font-bold text-gray-600 text-sm">Fri</div>
+                        <div class="font-bold text-gray-600 text-sm">Sat</div>
+                    </div>
+                    <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
+                </div>
+
+                <!-- Appointments List -->
+                <div id="appointmentsList" class="space-y-3">
+                    <p class="text-gray-500 text-center py-4">No appointments scheduled</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clients Tab -->
+        <div id="clients" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-users mr-2 text-sky-600"></i>Clients</h2>
+                    <button onclick="openClientModal()" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition">
+                        <i class="fas fa-plus mr-2"></i>Add Client
+                    </button>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="clientSearch" placeholder="Search clients..." class="w-full p-3 border rounded-lg" onkeyup="searchClients()">
+                </div>
+                <div id="clientsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <p class="text-gray-500 text-center py-4 col-span-full">No clients added yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotes Tab -->
+        <div id="quotes" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-file-alt mr-2 text-sky-600"></i>Quotes</h2>
+                    <button onclick="openQuoteModal()" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition">
+                        <i class="fas fa-plus mr-2"></i>New Quote
+                    </button>
+                </div>
+                <div id="quotesList" class="space-y-4">
+                    <p class="text-gray-500 text-center py-4">No quotes created yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoices Tab -->
+        <div id="invoices" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-file-invoice mr-2 text-sky-600"></i>Invoices</h2>
+                    <button onclick="openInvoiceModal()" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition">
+                        <i class="fas fa-plus mr-2"></i>New Invoice
+                    </button>
+                </div>
+                <div id="invoicesList" class="space-y-4">
+                    <p class="text-gray-500 text-center py-4">No invoices created yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finances Tab -->
+        <div id="finances" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Income Form -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold mb-4 text-green-600"><i class="fas fa-plus-circle mr-2"></i>Add Income</h3>
+                    <form id="incomeForm" onsubmit="addIncome(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Description</label>
+                            <input type="text" id="incomeDesc" required class="w-full p-3 border rounded-lg" placeholder="e.g., Pipe installation for Mr. Ade">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Amount (₦)</label>
+                            <input type="number" id="incomeAmount" required class="w-full p-3 border rounded-lg" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Date</label>
+                            <input type="date" id="incomeDate" required class="w-full p-3 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Client (Optional)</label>
+                            <select id="incomeClient" class="w-full p-3 border rounded-lg">
+                                <option value="">Select client</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition">
+                            <i class="fas fa-save mr-2"></i>Save Income
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Expense Form -->
+                <div class="bg-white rounded-xl shadow-lg p-6" id="expenseForm">
+                    <h3 class="text-lg font-bold mb-4 text-red-600"><i class="fas fa-minus-circle mr-2"></i>Add Expense</h3>
+                    <form onsubmit="addExpense(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Category</label>
+                            <select id="expenseCategory" required class="w-full p-3 border rounded-lg">
+                                <option value="food">🍽️ Food/Feeding</option>
+                                <option value="transport">🚗 Transport</option>
+                                <option value="materials">🔧 Materials</option>
+                                <option value="labour">👷 Labour</option>
+                                <option value="other">📦 Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Description</label>
+                            <input type="text" id="expenseDesc" required class="w-full p-3 border rounded-lg" placeholder="e.g., PVC pipes for job">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Amount (₦)</label>
+                            <input type="number" id="expenseAmount" required class="w-full p-3 border rounded-lg" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Date</label>
+                            <input type="d
